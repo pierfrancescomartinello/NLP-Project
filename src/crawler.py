@@ -143,7 +143,7 @@ class Crawler:
             node = self._links.pop() # We pop the first element in the structure, LIFO or FIFO order depends by the strategy
             if node.addr not in self._visited: # If the node has not been already visited, we visit it
                 # Visualization and debug helper
-                print(f"\033[32m Depth= {node.depth}, Links: {len(self._links)}, Visited: {len(self._visited)} \033[0m")
+                print(f"\033[32m Depth: {node.depth}, Links: {len(self._links)}, Visited: {len(self._visited)} \033[0m")
 
                 self._visited.add(node.addr) # We flag the URL as visited
 
@@ -153,46 +153,36 @@ class Crawler:
                 if node.depth < self.max_depth: # If we have not reached the maximum depth, we explore the hyperlinks of the page
                     neigh_links = self._fetch_links(soup)
 
-                    neigh_links = clean_links(neigh_links) # Cleaning links that are not useful to our crawling (non www.unipa.it sites)
-                    neigh_links = _url_list_merging(self._visited, neigh_links) # Removing links already visited
-
+                    # Cleaning links that are not useful to our crawling (non www.unipa.it sites) or already visited
+                    neigh_links = clean_links(self._visited, neigh_links) 
+                    
                     self._links = self._do_strategy(self._links, neigh_links, node.depth) # We add the new URLs to the structure
             else:
                 print("\033[31m Page already visited! \033[0m") # Visualization that helps in case we are visiting something already visited
         return articles
 
 # TODO merge this method with the following
-def clean_links(links: set[str]) -> set[str]:
+def clean_links(_visited: set[Link], links: set[str]) -> list[str]:
     """
     Cleans and filters the given set of links to include only those from the domain "://www.unipa.it"
-    and excludes those that contain "://www.unipa.it/.".
+    and excludes those that contain "://www.unipa.it/.". It also cleans the links from the site 
+    already visited
 
     Parameters:
+    - _visited (set[str]): The set of URLs that have already been visited.
     - links (set[str]): The set of links to be cleaned.
 
     Returns:
-    - set[str]: The cleaned set of links.
+    - list[str]: The cleaned list of links.
     """
-    return set(
+    temp = set(
         [
             i
             for i in list(links)
             if "://www.unipa.it" in i and "://www.unipa.it/." not in i
         ]
     )
-
-def _url_list_merging(_visited: set[Link], fetched_links: set[str]) -> list[str]:
-    """
-    Merges the current links with the set of visited links, removing any already visited URLs.
-
-    Parameters:
-    - _visited (set[str]): The set of URLs that have already been visited.
-    - fetched_links (set[str]): The set of new links to be merged.
-
-    Returns:
-    - list[str]: The list of new, unvisited links.
-    """
-    return list(fetched_links - _visited)
+    return list(temp - _visited)
 
 
 if __name__ == "__main__":
