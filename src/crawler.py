@@ -154,7 +154,7 @@ class Crawler:
                     neigh_links = self._fetch_links(soup)
 
                     # Cleaning links that are not useful to our crawling (non www.unipa.it sites) or already visited
-                    neigh_links = clean_links(self._visited, neigh_links) 
+                    neigh_links = _clean_links(self._visited, neigh_links) 
                     
                     self._links = self._do_strategy(self._links, neigh_links, node.depth) # We add the new URLs to the structure
             else:
@@ -162,7 +162,7 @@ class Crawler:
         return articles
 
 # TODO merge this method with the following
-def clean_links(_visited: set[Link], links: set[str]) -> list[str]:
+def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
     """
     Cleans and filters the given set of links to include only those from the domain "://www.unipa.it"
     and excludes those that contain "://www.unipa.it/.". It also cleans the links from the site 
