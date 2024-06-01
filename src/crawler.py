@@ -1,12 +1,20 @@
+from typing import Callable
 from bs4 import BeautifulSoup
 import requests
 
 from .preprocessor import remove_linebreak
 
 
-def fetch_page(url: str) -> BeautifulSoup:
-    res = requests.get(url)
-    return BeautifulSoup(res.content, "lxml")
+class Crawler:
+    max_depth: int
+    cur_depth: int
+    root: str
+    links: list[str]
+    strategy: Callable
+
+    def fetch_page(self, link: str) -> BeautifulSoup:
+        res = requests.get(link)
+        return BeautifulSoup(res.content, "lxml")
 
 
 if __name__ == "__main__":
