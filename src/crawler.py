@@ -58,8 +58,7 @@ class Crawler:
     def _URL_list_merging(_visited:set[str], fetched_links:set[str]):
         return list(set(fetched_links) - _visited)
 
-    def URL_cleaning():
-        pass
+
 
 
 if __name__ == "__main__":
