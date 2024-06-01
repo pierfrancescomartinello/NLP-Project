@@ -1,17 +1,16 @@
 from typing import Callable
 from bs4 import BeautifulSoup
 import requests
-import hashlib
 
 from .preprocessor import remove_linebreak
 
 
 class Crawler:
     max_depth: int
-    _cur_depth: int = 1
+    _cur_depth: int = 0
     root: str
-    _links: list[str] = []
-    _visited: list[str] = [] # Contains the URLs already visited, Python already works with hashes when dealing with search in lists
+    _links: set[str] = set()
+    _visited: set[str] = set() # Contains the URLs already visited, Python already works with hashes when dealing with search in sets
     strategy: Callable
 
     def _bfs(self):
@@ -25,14 +24,21 @@ class Crawler:
         "bfs": _bfs(),
     }
 
-    def fetch_page(self, link: str) -> BeautifulSoup:
+    def __init__(self, max_depth, root, strategy):
+        self.max_depth = max_depth
+        self.root = root
+        self.strategy = strategy
+        self._links = set(root)
+
+
+    def _fetch_page(self, link: str) -> BeautifulSoup:
         res = requests.get(link)
         return BeautifulSoup(res.content, "lxml")
 
-    def fetch_links(self, soup: BeautifulSoup) -> list[str]:
-        return [a['href'] for a in soup.find_all("a", href=True)]
+    def _fetch_links(self, soup: BeautifulSoup) -> list[str]:
+        return set(a['href'] for a in soup.find_all("a", href=True))
 
-    def fetch_articles(self,soup: BeautifulSoup, link: str) -> list[str]:
+    def _fetch_articles(self, soup: BeautifulSoup, link: str) -> list[str]:
         soup = self.fetch_page(link)
         texts = []
 
@@ -43,11 +49,11 @@ class Crawler:
 
         return texts
 
-    def __init__(self, max_depth, root, strategy):
-        self.max_depth = max_depth;
-        # self
-        pass
+    def _URL_list_merging(_visited:set[str], fetched_links:set[str]):
+        return list(set(fetched_links) - _visited)
 
+    def URL_cleaning():
+        pass
 if __name__ == "__main__":
     c = Crawler()
     bs = c.fetch_page("hi")
