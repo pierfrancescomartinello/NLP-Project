@@ -9,9 +9,6 @@ Link = namedtuple("Link", ["addr", "depth"])
 
 
 class Crawler:
-    """
-    _visited contains the urls as raw strings, as Python compares hashes when doing string comparison.
-    """
 
     max_depth: int
     root: str
@@ -65,20 +62,22 @@ class Crawler:
         articles = []
         while self._links:
             node = self._links.pop()
-            print(node)
-            self._visited.add(node.addr)
+            if node.addr not in self._visited:
+                print(f"\033[32m Depth= {node.depth}, Links: {len(self._links)}, Visited: {len(self._visited)} \033[0m")
+                self._visited.add(node.addr)
 
-            soup = self._fetch_page(node)
-            articles += self._fetch_articles(soup)
+                soup = self._fetch_page(node)
+                articles += self._fetch_articles(soup)
 
-            if node.depth < self.max_depth:
-                neigh_links = self._fetch_links(soup)
+                if node.depth < self.max_depth:
+                    neigh_links = self._fetch_links(soup)
 
-                neigh_links = clean_links(neigh_links)
-                neigh_links = _url_list_merging(self._visited, neigh_links)
+                    neigh_links = clean_links(neigh_links)
+                    neigh_links = _url_list_merging(self._visited, neigh_links)
 
-                self._links = self._do_strategy(self._links, neigh_links, node.depth)
-
+                    self._links = self._do_strategy(self._links, neigh_links, node.depth)
+            else:
+                print("\033[31m Page already visited! \033[0m")
         return articles
 
 
@@ -87,21 +86,20 @@ def clean_links(links: set):
         [
             i
             for i in list(links)
-            if i.startswith("https://www.unipa.it/")
-            or i.startswith("http://www.unipa.it")
+            if "://www.unipa.it" in i and "://www.unipa.it/." not in i
         ]
     )
 
 
 def _url_list_merging(_visited: set[Link], fetched_links: set[str]):
-    return list((fetched_links) - _visited)
+    return list(fetched_links - _visited)
 
 
 if __name__ == "__main__":
     c = Crawler(
         root="https://www.unipa.it",
-        # strategy="dfs",
-        max_depth=1,
+        strategy="bfs",
+        max_depth=3,
     )
 
     articles = c.crawl()
