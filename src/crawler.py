@@ -8,20 +8,23 @@ def fetch_page(url: str) -> BeautifulSoup:
     res = requests.get(url)
     return BeautifulSoup(res.content, "lxml")
 
+def fetch_links(soup: BeautifulSoup) -> list[str]:
+    return [a['href'] for a in soup.find_all("a", href=True)]
 
-if __name__ == "__main__":
-    link = "https://www.unipa.it/ateneo/Storia-dellAteneo/index.html"
-    link = "https://www.unipa.it/dipartimenti/matematicaeinformatica/cds/dataalgorithmsandmachineintelligence2270/"
-
+def fetch_articles(soup: BeautifulSoup, link: str) -> list[str]:
     soup = fetch_page(link)
-    articles = soup.find_all("article")
     texts = []
 
-    for art in articles:
+    for art in soup.find_all("article"):
         paragraphs = art.find_all("p")
-
-        p_text = [remove_linebreak(p.get_text()) for p in paragraphs]
-        text = "".join(p_text)
+        text = "".join(remove_linebreak(p.get_text()) for p in paragraphs)
         texts.append(text)
 
-    print(texts)
+    return texts
+
+
+
+if __name__ == "__main__":
+    bs = fetch_page("hi")
+    fetch_articles(bs)
+    fetch_links(bs)
