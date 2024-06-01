@@ -1,13 +1,16 @@
-from src.crawler import Crawler, fetch_page
-
-
-def test_fetch_page():
-    soup = fetch_page("https://ismyinternetworking.com/")
-    assert soup.text
+from src.crawler import Crawler
 
 
 def test_set_strategy():
-    c = Crawler(1, "https://ismyinternetworking.com/", "bfs")
+    strategy = "bfs"
+
+    c = Crawler(
+        "https://ismyinternetworking.com/",
+        1,
+        strategy=strategy,
+    )
+
+    assert c.strategy == strategy
 
 
 def test_fetch_article():

@@ -6,37 +6,40 @@ from .preprocessor import remove_linebreak
 
 
 class Crawler:
+    """
+    _visited contains the urls as raw strings, as Python compares hashes when doing string comparison.
+    """
+
     max_depth: int
-    _cur_depth: int = 0
     root: str
-    _links: set[str] = set()
-    _visited: set[str] = set() # Contains the URLs already visited, Python already works with hashes when dealing with search in sets
     strategy: Callable
+    _cur_depth: int = 0
+    _links: list[str] = []
+    _visited: set[str] = {}
 
-    def _bfs(self):
-        pass
-
-    def _dfs(self):
-        pass
-
-    _funcs = {
-        "dfs": _dfs(),
-        "bfs": _bfs(),
-    }
-
-    def __init__(self, max_depth, root, strategy):
+    def __init__(self, root, max_depth, strategy="bfs"):
         self.max_depth = max_depth
         self.root = root
         self.strategy = strategy
-        self._links = set(root)
+        self._links = [root]
 
+        _funcs = {
+            "dfs": self._dfs_step(),
+            "bfs": self._bfs_step(),
+        }
+
+    def _bfs_step(self):
+        pass
+
+    def _dfs_step(self):
+        pass
 
     def _fetch_page(self, link: str) -> BeautifulSoup:
         res = requests.get(link)
         return BeautifulSoup(res.content, "lxml")
 
-    def _fetch_links(self, soup: BeautifulSoup) -> list[str]:
-        return set(a['href'] for a in soup.find_all("a", href=True))
+    def __fetch_links(self, soup: BeautifulSoup) -> set[str]:
+        return set(a["href"] for a in soup.find_all("a", href=True))
 
     def _fetch_articles(self, soup: BeautifulSoup, link: str) -> list[str]:
         soup = self.fetch_page(link)
@@ -49,13 +52,24 @@ class Crawler:
 
         return texts
 
+    def crawl():
+        pass
+
     def _URL_list_merging(_visited:set[str], fetched_links:set[str]):
         return list(set(fetched_links) - _visited)
 
     def URL_cleaning():
         pass
+
+
 if __name__ == "__main__":
-    c = Crawler()
+    c = Crawler(
+        root="https://www.unipa.it",
+        strategy="bfs",
+        max_depth=3,
+    )
+
     bs = c.fetch_page("hi")
     c.fetch_articles(bs)
+    c.fetch_links(bs)
     c.fetch_links(bs)
