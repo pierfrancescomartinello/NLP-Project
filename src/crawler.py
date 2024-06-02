@@ -1,7 +1,10 @@
-import validators
-from typing import Callable
-from bs4 import BeautifulSoup
 import requests
+from typing import Callable
+
+import matplotlib.pyplot as plt
+import networkx as nx
+from bs4 import BeautifulSoup
+import validators
 from collections import namedtuple
 
 from preprocessor import remove_linebreak
@@ -26,11 +29,13 @@ class Crawler:
     max_depth: int
     root: str
     strategy: str
+    topology: nx.Graph
+    _max_visits: int
     _do_strategy: Callable
     _links: list[Link] = []
     _visited: set[str] = set()
 
-    def __init__(self, root, max_depth, strategy="bfs"):
+    def __init__(self, root, max_depth, max_visits, strategy="bfs"):
         """
         Initializes the Crawler with the root URL, maximum depth, and crawling strategy.
 
@@ -41,8 +46,10 @@ class Crawler:
         """
 
         self.max_depth = max_depth
+        self.max_visits = max_visits
         self.root = root
         self.strategy = strategy
+        self.topology = nx.Graph()
         self._links = [Link(root, 0)]  # Start with the root URL at depth 0
         self._visited = set()  # The visited set is initialized as empty
 
@@ -61,7 +68,7 @@ class Crawler:
 
         Parameters:
         - x (list[Link]): The current list of links to be processed.
-        - y (list[str]): The new links found to be added to the list.
+        - y (list[Link]): The new links found to be added to the list.
         - depth (int): The current depth of the crawl.
 
         Returns:
@@ -138,6 +145,17 @@ class Crawler:
 
         return texts
 
+    def plot_topology(self):
+        nx.draw(
+            self.topology,
+            with_labels=True,
+            node_size=0,
+            font_size=5,
+            font_weight="bold",
+        )
+
+        plt.show()
+
     def crawl(self) -> list[str]:
         """
         Starts the crawling process from the root URL, following links up to the maximum depth.
@@ -151,10 +169,11 @@ class Crawler:
         while self._links != []:
             # We pop the first element in the structure, LIFO or FIFO order depends by the strategy
             node = self._links.pop()
+            self.topology.add_node(node.addr)
+            print(node)
 
-            # If the node has not been already visited, we visit it
+            # Visit node if unvisited
             if node.addr in self._visited:
-                # Visualization that helps in case we are visiting something already visited
                 print("\033[31m Page already visited! \033[0m")
                 continue
 
@@ -165,6 +184,8 @@ class Crawler:
 
             # We flag the URL as visited
             self._visited.add(node.addr)
+            if len(self._visited) == self.max_visits:
+                break
 
             # Starting analyzing the important text
             if (soup := self._fetch_page(node)) is None:
@@ -175,6 +196,9 @@ class Crawler:
             # If we have not reached the maximum depth, we explore the hyperlinks of the page
             if node.depth < self.max_depth:
                 neigh_links = self._fetch_links(soup)
+
+                for link in neigh_links:
+                    self.topology.add_edge(node.addr, link)
 
                 # Cleaning links that are not useful to our crawling (non www.unipa.it sites) or already visited
                 neigh_links = _clean_links(self._visited, neigh_links)
@@ -210,10 +234,13 @@ def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
 
 if __name__ == "__main__":
     c = Crawler(
-        root="https://www.unipa.it",
+        root="https://www.unipa.it/",
         strategy="bfs",
         max_depth=3,
+        max_visits=5,
     )
 
     articles = c.crawl()
     print(articles)
+
+    c.plot_topology()
