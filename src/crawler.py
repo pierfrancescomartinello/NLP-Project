@@ -143,33 +143,33 @@ class Crawler:
             # We pop the first element in the structure, LIFO or FIFO order depends by the strategy
             node = self._links.pop()
             # If the node has not been already visited, we visit it
-            if node.addr not in self._visited:
-                # Visualization and debug helper
-                print(
-                    f"\033[32m Depth: {node.depth}, Links: {len(self._links)}, Visited: {len(self._visited)} \033[0m"
-                )
 
-                # We flag the URL as visited
-                self._visited.add(node.addr)
-
-                # Starting analyzing the important text
-                soup = self._fetch_page(node)
-                articles += self._fetch_articles(soup)
-
-                # If we have not reached the maximum depth, we explore the hyperlinks of the page
-                if node.depth < self.max_depth:
-                    neigh_links = self._fetch_links(soup)
-
-                    # Cleaning links that are not useful to our crawling (non www.unipa.it sites) or already visited
-                    neigh_links = _clean_links(self._visited, neigh_links)
-
-                    # We add the new URLs to the structure
-                    self._links = self._do_strategy(
-                        self._links, neigh_links, node.depth
-                    )
-            else:
+            if node.addr in self._visited:
                 # Visualization that helps in case we are visiting something already visited
                 print("\033[31m Page already visited! \033[0m")
+                continue
+
+            # Visualization and debug helper
+            print(
+                f"\033[32m Depth: {node.depth}, Links: {len(self._links)}, Visited: {len(self._visited)} \033[0m"
+            )
+
+            # We flag the URL as visited
+            self._visited.add(node.addr)
+
+            # Starting analyzing the important text
+            soup = self._fetch_page(node)
+            articles += self._fetch_articles(soup)
+
+            # If we have not reached the maximum depth, we explore the hyperlinks of the page
+            if node.depth < self.max_depth:
+                neigh_links = self._fetch_links(soup)
+
+                # Cleaning links that are not useful to our crawling (non www.unipa.it sites) or already visited
+                neigh_links = _clean_links(self._visited, neigh_links)
+
+                # We add the new URLs to the structure
+                self._links = self._do_strategy(self._links, neigh_links, node.depth)
 
         return articles
 
