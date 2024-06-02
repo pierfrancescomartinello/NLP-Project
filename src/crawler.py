@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import requests
 from collections import namedtuple
 
-from preprocessor import remove_linebreak
+from .preprocessor import remove_linebreak
 
 # Define a namedtuple for representing a hyperlink and its depth in the crawling process
 Link = namedtuple("Link", ["addr", "depth"])
