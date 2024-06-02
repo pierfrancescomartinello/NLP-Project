@@ -30,7 +30,6 @@ class Crawler:
     _visited: set[str] = set()
 
     def __init__(self, root, max_depth, strategy="bfs"):
-
         """
         Initializes the Crawler with the root URL, maximum depth, and crawling strategy.
 
@@ -39,12 +38,12 @@ class Crawler:
         - max_depth (int): The maximum depth to crawl.
         - strategy (str): The crawling strategy ("bfs" for breadth-first search or "dfs" for depth-first search).
         """
-        
+
         self.max_depth = max_depth
         self.root = root
         self.strategy = strategy
-        self._links = [Link(root, 0)] # Start with the root URL at depth 0
-        self._visited = set() # The visited set is initialized as empty
+        self._links = [Link(root, 0)]  # Start with the root URL at depth 0
+        self._visited = set()  # The visited set is initialized as empty
 
         # Dictionary mapping strategy names to their corresponding methods
         _funcs = {
@@ -124,7 +123,7 @@ class Crawler:
 
         for art in soup.find_all("article"):
             paragraphs = art.find_all("p")
-            
+
             text = "".join(remove_linebreak(p.get_text()) for p in paragraphs)
             texts.append(text)
 
@@ -139,33 +138,46 @@ class Crawler:
         """
 
         articles = []
-        while self._links != []: # Until we have finished crawling
-            node = self._links.pop() # We pop the first element in the structure, LIFO or FIFO order depends by the strategy
-            if node.addr not in self._visited: # If the node has not been already visited, we visit it
+        # Until we have finished crawling
+        while self._links != []:
+            # We pop the first element in the structure, LIFO or FIFO order depends by the strategy
+            node = self._links.pop()
+            # If the node has not been already visited, we visit it
+            if node.addr not in self._visited:
                 # Visualization and debug helper
-                print(f"\033[32m Depth: {node.depth}, Links: {len(self._links)}, Visited: {len(self._visited)} \033[0m")
+                print(
+                    f"\033[32m Depth: {node.depth}, Links: {len(self._links)}, Visited: {len(self._visited)} \033[0m"
+                )
 
-                self._visited.add(node.addr) # We flag the URL as visited
+                # We flag the URL as visited
+                self._visited.add(node.addr)
 
-                soup = self._fetch_page(node) # Starting analyzing the important text
+                # Starting analyzing the important text
+                soup = self._fetch_page(node)
                 articles += self._fetch_articles(soup)
 
-                if node.depth < self.max_depth: # If we have not reached the maximum depth, we explore the hyperlinks of the page
+                # If we have not reached the maximum depth, we explore the hyperlinks of the page
+                if node.depth < self.max_depth:
                     neigh_links = self._fetch_links(soup)
 
                     # Cleaning links that are not useful to our crawling (non www.unipa.it sites) or already visited
-                    neigh_links = _clean_links(self._visited, neigh_links) 
-                    
-                    self._links = self._do_strategy(self._links, neigh_links, node.depth) # We add the new URLs to the structure
+                    neigh_links = _clean_links(self._visited, neigh_links)
+
+                    # We add the new URLs to the structure
+                    self._links = self._do_strategy(
+                        self._links, neigh_links, node.depth
+                    )
             else:
-                print("\033[31m Page already visited! \033[0m") # Visualization that helps in case we are visiting something already visited
+                # Visualization that helps in case we are visiting something already visited
+                print("\033[31m Page already visited! \033[0m")
+
         return articles
 
 
 def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
     """
     Cleans and filters the given set of links to include only those from the domain "://www.unipa.it"
-    and excludes those that contain "://www.unipa.it/.". It also cleans the links from the site 
+    and excludes those that contain "://www.unipa.it/.". It also cleans the links from the site
     already visited
 
     Parameters:
