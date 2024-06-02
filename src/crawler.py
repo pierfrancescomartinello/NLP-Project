@@ -18,8 +18,8 @@ class Crawler:
     - root (str): The root URL from which the crawling starts.
     - strategy (str): The strategy to use for crawling ("bfs" or "dfs").
     - _do_strategy (Callable): The method to execute the chosen crawling strategy.
-    - _links (List[Link]): The list of links to be processed.
-    - _visited (Set[str]): A set of URLs that have already been visited. We deal with URLs instead of their hashes due to the fact that Python does that under the hood.
+    - _links (list[Link]): The list of links to be processed.
+    - _visited (set[str]): A set of URLs that have already been visited. We deal with URLs instead of their hashes due to the fact that Python does that under the hood.
     """
 
     max_depth: int
@@ -60,8 +60,8 @@ class Crawler:
         Executes a single step of the breadth-first search (BFS) strategy.
 
         Parameters:
-        - x (ist[Link]): The current list of links to be processed.
-        - y (ist[str]): The new links found to be added to the list.
+        - x (list[Link]): The current list of links to be processed.
+        - y (list[str]): The new links found to be added to the list.
         - depth (int): The current depth of the crawl.
 
         Returns:
@@ -179,7 +179,7 @@ def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
         [
             i
             for i in list(links)
-            if "://www.unipa.it" in i and "://www.unipa.it/." not in i
+            if "://www.unipa.it" in i and "://www.unipa.it/.content" not in i
         ]
     )
     return list(temp - _visited)
