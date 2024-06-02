@@ -161,7 +161,7 @@ class Crawler:
                 print("\033[31m Page already visited! \033[0m") # Visualization that helps in case we are visiting something already visited
         return articles
 
-# TODO merge this method with the following
+
 def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
     """
     Cleans and filters the given set of links to include only those from the domain "://www.unipa.it"
