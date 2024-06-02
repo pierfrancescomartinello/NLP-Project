@@ -226,7 +226,7 @@ def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
         [
             addr
             for addr in list(links)
-            if "://www.unipa.it" in addr and "://www.unipa.it/.content" not in addr
+            if "://www.unipa.it" in addr and "://www.unipa.it/.content" not in addr and not addr.endswith("pdf")
         ]
     )
     return list(temp - _visited)
