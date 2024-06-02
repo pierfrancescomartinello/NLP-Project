@@ -84,7 +84,7 @@ class Crawler:
         y = [Link(el, depth + 1) for el in y]
         return y + x
 
-    def _fetch_page(self, link: Link) -> BeautifulSoup:
+    def _fetch_page(self, link: Link) -> BeautifulSoup | None:
         """
         Fetches the content of the page at the given link using an HTTP GET request.
 
@@ -95,7 +95,11 @@ class Crawler:
         - BeautifulSoup: The parsed content of the page.
         """
         res = requests.get(link.addr)
-        return BeautifulSoup(res.content, "lxml")
+
+        if res.ok:
+            return BeautifulSoup(res.content, "lxml")
+
+        return None
 
     def _fetch_links(self, soup: BeautifulSoup) -> set[str]:
         """
@@ -158,7 +162,9 @@ class Crawler:
             self._visited.add(node.addr)
 
             # Starting analyzing the important text
-            soup = self._fetch_page(node)
+            if soup := self._fetch_page(node) is None:
+                continue
+
             articles += self._fetch_articles(soup)
 
             # If we have not reached the maximum depth, we explore the hyperlinks of the page
