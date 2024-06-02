@@ -53,7 +53,7 @@ def test_fetch_links():
         max_depth=3,
     )
     soup = BeautifulSoup(c.root, "lxml")
-    c._fetch_links(soup)
+    assert c._fetch_links(soup) != []
 
 
 def test_dfs_step():
