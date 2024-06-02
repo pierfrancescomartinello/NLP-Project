@@ -56,13 +56,9 @@ def test_fetch_links():
     c._fetch_links(soup)
 
 
-def test_dfs():
+def test_dfs_step():
     raise NotImplementedError
 
 
-def test_bfs():
-    raise NotImplementedError
-
-
-def test_heuristic_search():
+def test_bfs_step():
     raise NotImplementedError
