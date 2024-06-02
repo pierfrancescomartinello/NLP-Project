@@ -63,7 +63,7 @@ class Crawler:
         # Assign the strategy method based on the chosen strategy
         self._do_strategy = _funcs[self.strategy]
 
-    def _bfs_step(self, queue: list[Link], nodes: list[Link], depth: int):
+    def _bfs_step(self, queue: list[Link], nodes: list[str], depth: int):
         """
         Executes a single step of the breadth-first search (BFS) strategy.
 
@@ -78,7 +78,7 @@ class Crawler:
         nodes = [Link(el, depth + 1) for el in nodes]
         return queue + nodes
 
-    def _dfs_step(self, stack: list[Link], nodes: list[Link], depth: int):
+    def _dfs_step(self, stack: list[Link], nodes: list[str], depth: int):
         """
         Executes a single step of the depth-first search (DFS) strategy.
 
