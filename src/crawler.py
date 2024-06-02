@@ -1,3 +1,4 @@
+import math
 import requests
 from typing import Callable
 
@@ -35,7 +36,7 @@ class Crawler:
     _links: list[Link] = []
     _visited: set[str] = set()
 
-    def __init__(self, root, max_depth, max_visits, strategy="bfs"):
+    def __init__(self, root, max_depth, max_visits=math.inf, strategy="bfs"):
         """
         Initializes the Crawler with the root URL, maximum depth, and crawling strategy.
 
@@ -62,7 +63,7 @@ class Crawler:
         # Assign the strategy method based on the chosen strategy
         self._do_strategy = _funcs[self.strategy]
 
-    def _bfs_step(self, x: list[Link], y: list[Link], depth: int):
+    def _bfs_step(self, queue: list[Link], nodes: list[Link], depth: int):
         """
         Executes a single step of the breadth-first search (BFS) strategy.
 
@@ -74,10 +75,10 @@ class Crawler:
         Returns:
         - list[Link]: The updated list of links after performing BFS step.
         """
-        y = [Link(el, depth + 1) for el in y]
-        return x + y
+        nodes = [Link(el, depth + 1) for el in nodes]
+        return queue + nodes
 
-    def _dfs_step(self, x: list[Link], y: list[Link], depth: int):
+    def _dfs_step(self, stack: list[Link], nodes: list[Link], depth: int):
         """
         Executes a single step of the depth-first search (DFS) strategy.
 
@@ -89,8 +90,8 @@ class Crawler:
         Returns:
         - list[Link]: The updated list of links after performing DFS step.
         """
-        y = [Link(el, depth + 1) for el in y]
-        return y + x
+        nodes = [Link(el, depth + 1) for el in nodes]
+        return nodes + stack
 
     def _fetch_page(self, link: Link) -> BeautifulSoup | None:
         """
@@ -150,8 +151,7 @@ class Crawler:
             self.topology,
             with_labels=True,
             node_size=0,
-            font_size=5,
-            font_weight="bold",
+            font_size=7,
         )
 
         plt.show()
@@ -197,11 +197,11 @@ class Crawler:
             if node.depth < self.max_depth:
                 neigh_links = self._fetch_links(soup)
 
-                for link in neigh_links:
-                    self.topology.add_edge(node.addr, link)
-
                 # Cleaning links that are not useful to our crawling (non www.unipa.it sites) or already visited
                 neigh_links = _clean_links(self._visited, neigh_links)
+
+                for link in neigh_links:
+                    self.topology.add_edge(node.addr, link)
 
                 # We add the new URLs to the structure
                 self._links = self._do_strategy(self._links, neigh_links, node.depth)
@@ -224,9 +224,9 @@ def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
     """
     temp = set(
         [
-            i
-            for i in list(links)
-            if "://www.unipa.it" in i and "://www.unipa.it/.content" not in i
+            addr
+            for addr in list(links)
+            if "://www.unipa.it" in addr and "://www.unipa.it/.content" not in addr
         ]
     )
     return list(temp - _visited)
@@ -237,7 +237,7 @@ if __name__ == "__main__":
         root="https://www.unipa.it/",
         strategy="bfs",
         max_depth=3,
-        max_visits=5,
+        max_visits=50,
     )
 
     articles = c.crawl()
