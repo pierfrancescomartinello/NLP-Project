@@ -1,3 +1,4 @@
+import validators
 from typing import Callable
 from bs4 import BeautifulSoup
 import requests
@@ -52,7 +53,7 @@ class Crawler:
         }
 
         # Assign the strategy method based on the chosen strategy
-        self._do_strategy = lambda x, y, z: _funcs[self.strategy](x, y, z)
+        self._do_strategy = _funcs[self.strategy]
 
     def _bfs_step(self, x: list[Link], y: list[Link], depth: int):
         """
@@ -94,11 +95,15 @@ class Crawler:
         Returns:
         - BeautifulSoup: The parsed content of the page.
         """
+        if not validators.url(link.addr):
+            return None
+
         res = requests.get(link.addr)
 
         if res.ok:
             return BeautifulSoup(res.content, "lxml")
 
+        print(f"Request to {link.addr} encountered an error.")
         return None
 
     def _fetch_links(self, soup: BeautifulSoup) -> set[str]:
@@ -125,8 +130,8 @@ class Crawler:
         """
         texts = []
 
-        for art in soup.find_all("article"):
-            paragraphs = art.find_all("p")
+        for article in soup.find_all("article"):
+            paragraphs = article.find_all("p")
 
             text = "".join(remove_linebreak(p.get_text()) for p in paragraphs)
             texts.append(text)
@@ -146,8 +151,8 @@ class Crawler:
         while self._links != []:
             # We pop the first element in the structure, LIFO or FIFO order depends by the strategy
             node = self._links.pop()
-            # If the node has not been already visited, we visit it
 
+            # If the node has not been already visited, we visit it
             if node.addr in self._visited:
                 # Visualization that helps in case we are visiting something already visited
                 print("\033[31m Page already visited! \033[0m")
@@ -162,7 +167,7 @@ class Crawler:
             self._visited.add(node.addr)
 
             # Starting analyzing the important text
-            if soup := self._fetch_page(node) is None:
+            if (soup := self._fetch_page(node)) is None:
                 continue
 
             articles += self._fetch_articles(soup)
