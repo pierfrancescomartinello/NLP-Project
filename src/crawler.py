@@ -178,6 +178,7 @@ class Crawler:
         """
 
         # Until we have finished crawling
+        # TODO: implement stopping by KeyboardInterrupt
         while self._links != []:
             # We pop the first element in the structure, LIFO or FIFO order depends by the strategy
             node = self._links.pop()
@@ -221,6 +222,7 @@ class Crawler:
         if not self._articles:
             print("No articles have been crawled. Please crawl() and try again.")
             return
+
         with open(output_dir, "w", encoding="utf-8") as output:
             json.dump(self._articles, output, ensure_ascii=False)
 
