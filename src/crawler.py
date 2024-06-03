@@ -227,7 +227,6 @@ class Crawler:
         with open(output_dir, "w", encoding="utf-8") as output:
             json.dump(self._articles, output, ensure_ascii=False)
 
-# TODO modify "*.content" to ".content"
 def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
     """
     Cleans and filters the given set of links to include only those from the domain "://www.unipa.it"
