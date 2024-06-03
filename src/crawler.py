@@ -218,6 +218,9 @@ class Crawler:
                 self._links = self._do_strategy(self._links, neigh_links, node.depth)
 
     def output_articles(self, output_dir: Path):
+        if not self._articles:
+            print("No articles have been crawled. Please crawl() and try again.")
+            return
         with open(output_dir, "w", encoding="utf-8") as output:
             json.dump(self._articles, output, ensure_ascii=False)
 
