@@ -1,4 +1,5 @@
 import math
+from pathlib import Path
 import requests
 from typing import Callable
 import json
@@ -11,6 +12,7 @@ import validators
 from collections import namedtuple
 
 from preprocessor import remove_nonbreaking
+
 
 # Define a namedtuple for representing a hyperlink and its depth in the crawling process
 Link = namedtuple("Link", ["addr", "depth"])
@@ -55,6 +57,7 @@ class Crawler:
         self.topology = nx.Graph()
         self._links = [Link(root, 0)]  # Start with the root URL at depth 0
         self._visited = set()  # The visited set is initialized as empty
+        self._articles = {}
 
         # Dictionary mapping strategy names to their corresponding methods
         _funcs = {
@@ -143,7 +146,7 @@ class Crawler:
         for article in soup.find_all("article"):
             paragraphs = article.find_all("p")
 
-            text = "".join((p.get_text()) for p in paragraphs)
+            text = "".join(remove_nonbreaking(p.get_text()) for p in paragraphs)
             texts.append(text)
 
         return texts
@@ -174,13 +177,11 @@ class Crawler:
         - list[str]: A list of articles extracted from the crawled pages.
         """
 
-        articles = {}
         # Until we have finished crawling
         while self._links != []:
             # We pop the first element in the structure, LIFO or FIFO order depends by the strategy
             node = self._links.pop()
             self.topology.add_node(node.addr)
-            print(node)
 
             # Visit node if unvisited
             if node.addr in self._visited:
@@ -201,7 +202,7 @@ class Crawler:
             if (soup := self._fetch_page(node)) is None:
                 continue
 
-            articles[node.addr] = self._fetch_articles(soup)
+            self._articles[node.addr] = self._fetch_articles(soup)
 
             # If we have not reached the maximum depth, we explore the hyperlinks of the page
             if node.depth < self.max_depth:
@@ -216,7 +217,9 @@ class Crawler:
                 # We add the new URLs to the structure
                 self._links = self._do_strategy(self._links, neigh_links, node.depth)
 
-        return articles
+    def output_articles(self, output_dir: Path):
+        with open(output_dir, "w", encoding="utf-8") as output:
+            json.dump(self._articles, output, ensure_ascii=False)
 
 
 def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
@@ -252,9 +255,7 @@ if __name__ == "__main__":
         max_visits=10,
     )
 
-    articles = c.crawl()
-
-    with open("./output.json", "w", encoding="utf-8") as output:
-        json.dump(articles, output, ensure_ascii=False)
+    c.crawl()
+    c.output_articles("./output.json")
 
     c.plot_topology()
