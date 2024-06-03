@@ -172,7 +172,7 @@ class Crawler:
         matplotlib.use("Agg") 
 
         # Saving it in memory
-        fig.savefig(f"{destination}/topology_for_{self.root}.jpeg")
+        fig.savefig(f"{destination}/topology.png")
 
     def crawl(self) -> list[str]:
         """
