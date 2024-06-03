@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from src.crawler import Crawler, Link
+import os
 
 
 def test_set_strategy():
@@ -12,6 +13,22 @@ def test_set_strategy():
     )
 
     assert c.strategy == strategy
+
+
+def test_crawl():
+    c = Crawler(
+        root="https://www.unipa.it",
+        strategy="bfs",
+        max_depth=3,
+        max_visits=50,
+    )
+
+    _ = c.crawl()
+
+    savedir = f"{os.getcwd()}/test"
+    c.plot_topology(savedir)
+
+    assert os.path.isfile(f"{savedir}/topology.png")
 
 
 def test_fetch_page():
@@ -57,8 +74,17 @@ def test_fetch_links():
 
 
 def test_dfs_step():
+    first_level = ["1", "2", "3"]
+    lvl2_1 = ["1a", "1b", "1c"]
+    lvl2_2 = ["2a", "2b", "2c"]
+    lvl2_3 = ["3a", "3b", "2c"]
+
     raise NotImplementedError
 
 
 def test_bfs_step():
+    first_level = ["1", "2", "3"]
+    lvl2_1 = ["1a", "1b", "1c"]
+    lvl2_2 = ["2a", "2b", "2c"]
+    lvl2_3 = ["3a", "3b", "2c"]
     raise NotImplementedError
