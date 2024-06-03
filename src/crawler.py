@@ -147,11 +147,12 @@ class Crawler:
         return texts
 
     def plot_topology(self):
-        nx.draw(
+        nx.draw_kamada_kawai(
             self.topology,
             with_labels=True,
-            node_size=0,
+            node_size=10,
             font_size=7,
+            edge_color="#847d7d"
         )
 
         plt.show()
