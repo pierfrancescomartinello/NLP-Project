@@ -169,6 +169,7 @@ class Crawler:
         # Saving it in memory
         fig.savefig(f"{destination}/topology.png")
 
+
     def crawl(self) -> dict[str, list[str]]:
         """
         Starts the crawling process from the root URL, following links up to the maximum depth.
@@ -224,7 +225,7 @@ class Crawler:
         with open(output_dir, "w", encoding="utf-8") as output:
             json.dump(self._articles, output, ensure_ascii=False)
 
-
+# TODO modify "*.content" to ".content"
 def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
     """
     Cleans and filters the given set of links to include only those from the domain "://www.unipa.it"
@@ -243,7 +244,7 @@ def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
             addr
             for addr in list(links)
             if "://www.unipa.it" in addr
-            and "://www.unipa.it/.content" not in addr
+            and ".content" not in addr
             and not addr.endswith("pdf")
         ]
     )
