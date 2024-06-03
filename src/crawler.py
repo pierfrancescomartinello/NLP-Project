@@ -1,16 +1,16 @@
 import math
 import requests
 from typing import Callable
+import json
 
 import matplotlib.pyplot as plt
-import matplotlib
 import networkx as nx
 from bs4 import BeautifulSoup
 import os
 import validators
 from collections import namedtuple
 
-from preprocessor import remove_linebreak
+from preprocessor import remove_nonbreaking
 
 # Define a namedtuple for representing a hyperlink and its depth in the crawling process
 Link = namedtuple("Link", ["addr", "depth"])
@@ -143,38 +143,30 @@ class Crawler:
         for article in soup.find_all("article"):
             paragraphs = article.find_all("p")
 
-            text = "".join(remove_linebreak(p.get_text()) for p in paragraphs)
+            text = "".join((p.get_text()) for p in paragraphs)
             texts.append(text)
 
         return texts
 
     def plot_topology(self, destination: str = os.getcwd()):
-
-        labels = { # Only the root has a visible label
-        n: (n
-            if n == self.root
-            else '')
-        for n in self.topology.nodes
-        }
+        # Only the root has a visible label
+        labels = {n: (n if n == self.root else "") for n in self.topology.nodes}
 
         # Draw a graph using matplotlib and networkx
         fig = plt.figure()
-        nx.draw_kamada_kawai( 
+        nx.draw_kamada_kawai(
             self.topology,
             with_labels=True,
             node_size=10,
             font_size=7,
             edge_color="#847d7d",
-            labels = labels
+            labels=labels,
         )
-
-        # Standard procedure for saving non interactable objects
-        matplotlib.use("Agg") 
 
         # Saving it in memory
         fig.savefig(f"{destination}/topology.png")
 
-    def crawl(self) -> list[str]:
+    def crawl(self) -> dict[str, list[str]]:
         """
         Starts the crawling process from the root URL, following links up to the maximum depth.
 
@@ -182,7 +174,7 @@ class Crawler:
         - list[str]: A list of articles extracted from the crawled pages.
         """
 
-        articles = []
+        articles = {}
         # Until we have finished crawling
         while self._links != []:
             # We pop the first element in the structure, LIFO or FIFO order depends by the strategy
@@ -209,7 +201,7 @@ class Crawler:
             if (soup := self._fetch_page(node)) is None:
                 continue
 
-            articles += self._fetch_articles(soup)
+            articles[node.addr] = self._fetch_articles(soup)
 
             # If we have not reached the maximum depth, we explore the hyperlinks of the page
             if node.depth < self.max_depth:
@@ -244,7 +236,9 @@ def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
         [
             addr
             for addr in list(links)
-            if "://www.unipa.it" in addr and "://www.unipa.it/.content" not in addr and not addr.endswith("pdf")
+            if "://www.unipa.it" in addr
+            and "://www.unipa.it/.content" not in addr
+            and not addr.endswith("pdf")
         ]
     )
     return list(temp - _visited)
@@ -255,10 +249,12 @@ if __name__ == "__main__":
         root="https://www.unipa.it/",
         strategy="bfs",
         max_depth=3,
-        max_visits=50,
+        max_visits=10,
     )
 
     articles = c.crawl()
-    print(articles)
+
+    with open("./output.json", "w", encoding="utf-8") as output:
+        json.dump(articles, output, ensure_ascii=False)
 
     c.plot_topology()
