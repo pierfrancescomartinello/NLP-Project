@@ -3,8 +3,10 @@ import requests
 from typing import Callable
 
 import matplotlib.pyplot as plt
+import matplotlib
 import networkx as nx
 from bs4 import BeautifulSoup
+import os
 import validators
 from collections import namedtuple
 
@@ -146,16 +148,31 @@ class Crawler:
 
         return texts
 
-    def plot_topology(self):
-        nx.draw_kamada_kawai(
+    def plot_topology(self, destination: str = os.getcwd()):
+
+        labels = { # Only the root has a visible label
+        n: (n
+            if n == self.root
+            else '')
+        for n in self.topology.nodes
+        }
+
+        # Draw a graph using matplotlib and networkx
+        fig = plt.figure()
+        nx.draw_kamada_kawai( 
             self.topology,
             with_labels=True,
             node_size=10,
             font_size=7,
-            edge_color="#847d7d"
+            edge_color="#847d7d",
+            labels = labels
         )
 
-        plt.show()
+        # Standard procedure for saving non interactable objects
+        matplotlib.use("Agg") 
+
+        # Saving it in memory
+        fig.savefig(f"{destination}/topology_for_{self.root}.jpeg")
 
     def crawl(self) -> list[str]:
         """
