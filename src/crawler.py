@@ -151,7 +151,9 @@ class Crawler:
 
         return texts
 
-    def plot_topology(self, destination: str = os.getcwd()):
+    def plot_topology(
+        self, destination: str = os.getcwd(), output_dir: str | None = None
+    ):
         # Only the root has a visible label
         labels = {n: (n if n == self.root else "") for n in self.topology.nodes}
 
@@ -167,7 +169,8 @@ class Crawler:
         )
 
         # Saving it in memory
-        fig.savefig(f"{destination}/topology.png")
+        if output_dir:
+            fig.savefig(f"{output_dir}")
 
     def crawl(self) -> dict[str, list[str]]:
         """
@@ -276,7 +279,6 @@ if __name__ == "__main__":
         # Keyboard interrupt does not end the execution but, returns whatever it has found
         pass
 
-    timestamp = datetime.now().strftime("%y%m%d%H%M")
+    timestamp = datetime.now().strftime("%y%m%d%H%M%S")
     c.output_articles(f"./output/output{timestamp}.json")
-
-    c.plot_topology()
+    c.plot_topology(output_dir=f"./output/output{timestamp}.png")
