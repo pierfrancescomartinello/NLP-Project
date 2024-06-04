@@ -202,6 +202,9 @@ class Crawler:
             # Necessary error handling to prevent progress from being lost due to fetching errors
             try:
                 soup = self._fetch_page(node)
+
+                if soup is None:
+                    continue
             except Exception as e:
                 print(f"An error occurred while fetching site data: {e}")
                 continue
@@ -256,14 +259,21 @@ def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
 
 
 if __name__ == "__main__":
+    from datetime import datetime
+
     c = Crawler(
         root="https://www.unipa.it/",
         strategy="bfs",
-        max_depth=3,
-        max_visits=10,
+        max_depth=15,
+        max_visits=math.inf,
     )
 
-    c.crawl()
-    c.output_articles("./output.json")
+    try:
+        c.crawl()
+    except Exception as e:
+        print(e)
+
+    timestamp = datetime.now().strftime("%y%m%d%H%M")
+    c.output_articles(f"./output/output{timestamp}.json")
 
     c.plot_topology()
