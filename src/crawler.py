@@ -169,7 +169,6 @@ class Crawler:
         # Saving it in memory
         fig.savefig(f"{destination}/topology.png")
 
-
     def crawl(self) -> dict[str, list[str]]:
         """
         Starts the crawling process from the root URL, following links up to the maximum depth.
@@ -200,8 +199,11 @@ class Crawler:
             if len(self._visited) == self.max_visits:
                 break
 
-            # Starting analyzing the important text
-            if (soup := self._fetch_page(node)) is None:
+            # Necessary error handling to prevent progress from being lost due to fetching errors
+            try:
+                soup = self._fetch_page(node)
+            except Exception as e:
+                print(f"An error occurred while fetching site data: {e}")
                 continue
 
             self._articles[node.addr] = self._fetch_articles(soup)
@@ -226,6 +228,7 @@ class Crawler:
 
         with open(output_dir, "w", encoding="utf-8") as output:
             json.dump(self._articles, output, ensure_ascii=False)
+
 
 def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
     """
