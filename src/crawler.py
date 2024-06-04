@@ -146,7 +146,7 @@ class Crawler:
         for article in soup.find_all("article"):
             paragraphs = article.find_all("p")
 
-            text = "".join(remove_nonbreaking(p.get_text()) for p in paragraphs)
+            text = " ".join(remove_nonbreaking(p.get_text()) for p in paragraphs)
             texts.append(text)
 
         return texts
@@ -264,8 +264,8 @@ if __name__ == "__main__":
     c = Crawler(
         root="https://www.unipa.it/",
         strategy="bfs",
-        max_depth=15,
-        max_visits=math.inf,
+        max_depth=5,
+        max_visits=50,
     )
 
     try:
