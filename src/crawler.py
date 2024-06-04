@@ -272,6 +272,9 @@ if __name__ == "__main__":
         c.crawl()
     except Exception as e:
         print(e)
+    except KeyboardInterrupt:
+        # Keyboard interrupt does not end the execution but, returns whatever it has found
+        pass
 
     timestamp = datetime.now().strftime("%y%m%d%H%M")
     c.output_articles(f"./output/output{timestamp}.json")
