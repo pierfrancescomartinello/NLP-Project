@@ -181,7 +181,6 @@ class Crawler:
         """
 
         # Until we have finished crawling
-        # TODO: implement stopping by KeyboardInterrupt
         while self._links != []:
             # We pop the first element in the structure, LIFO or FIFO order depends by the strategy
             node = self._links.pop()
@@ -267,8 +266,7 @@ if __name__ == "__main__":
     c = Crawler(
         root="https://www.unipa.it/",
         strategy="bfs",
-        max_depth=5,
-        max_visits=50,
+        max_depth=25
     )
 
     try:
