@@ -57,7 +57,7 @@ class Crawler:
         self.topology = nx.Graph()
         self._links = [Link(root, 0)]  # Start with the root URL at depth 0
         self._visited = set()  # The visited set is initialized as empty
-        self._articles = {}
+        self._articles = []
 
         # Dictionary mapping strategy names to their corresponding methods
         _funcs = {
@@ -147,9 +147,13 @@ class Crawler:
             paragraphs = article.find_all("p")
 
             text = " ".join(remove_nonbreaking(p.get_text()) for p in paragraphs)
-            texts.append(text)
 
-        return texts
+            # ignore empty paragraphs
+            if text:
+                texts.append(text)
+
+        # join every paragraph
+        return "".join(texts)
 
     def plot_topology(
         self, destination: str = os.getcwd(), output_dir: str | None = None
@@ -205,6 +209,7 @@ class Crawler:
             # Necessary error handling to prevent progress from being lost due to fetching errors
             try:
                 soup = self._fetch_page(node)
+                title = soup.find_all("title")[0].text
 
                 if soup is None:
                     continue
@@ -212,7 +217,7 @@ class Crawler:
                 print(f"An error occurred while fetching site data: {e}")
                 continue
 
-            self._articles[node.addr] = self._fetch_articles(soup)
+            self._articles.append((title, node.addr, self._fetch_articles(soup)))
 
             # If we have not reached the maximum depth, we explore the hyperlinks of the page
             if node.depth < self.max_depth:
@@ -268,7 +273,7 @@ if __name__ == "__main__":
         root="https://www.unipa.it/",
         strategy="bfs",
         max_depth=5,
-        max_visits=50,
+        max_visits=500,
     )
 
     try:
