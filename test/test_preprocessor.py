@@ -1,6 +1,6 @@
-from src.preprocessor import remove_linebreak
+from src.preprocessor import remove_nonbreaking
 
-
-def test_remove_linebreak():
-    assert "\xa0" not in remove_linebreak("ciao\xa0")
-    assert "\xa0" not in remove_linebreak("ciao\xa0\xa0")
+#TODO remove this file
+def test_remove_nonbreaking():
+    assert "\xa0" not in remove_nonbreaking("ciao\xa0")
+    assert "\xa0" not in remove_nonbreaking("ciao\xa0\xa0")

@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from src.crawler import Crawler, Link
 import os
-
+import glob
 
 def test_set_strategy():
     strategy = "bfs"
@@ -23,12 +23,14 @@ def test_crawl():
         max_visits=50,
     )
 
+    before = glob.glob("./output/output*.png")
     _ = c.crawl()
 
     savedir = f"{os.getcwd()}/test"
     c.plot_topology(savedir)
 
-    assert os.path.isfile(f"{savedir}/topology.png")
+    after = glob.glob("./output/output*.png")
+    assert len(before) == len(after) -1
 
 
 def test_fetch_page():
@@ -59,8 +61,8 @@ def test_fetch_article():
     s1 = c._fetch_page(rettori)
     s2 = c._fetch_page(home)
 
-    assert c._fetch_articles(s1) != []
-    assert c._fetch_articles(s2) == []
+    assert c._fetch_articles(s1) != ""
+    assert c._fetch_articles(s2) == ""
 
 
 def test_fetch_links():
