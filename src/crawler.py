@@ -11,8 +11,6 @@ import os
 import validators
 from collections import namedtuple
 
-from preprocessor import remove_nonbreaking
-
 
 # Define a namedtuple for representing a hyperlink and its depth in the crawling process
 Link = namedtuple("Link", ["addr", "depth"])
@@ -264,6 +262,8 @@ def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
     )
     return list(temp - _visited)
 
+def remove_nonbreaking(text: str) -> str:
+    return re.sub("(\xa0)+", " ", text)
 
 if __name__ == "__main__":
     from datetime import datetime
