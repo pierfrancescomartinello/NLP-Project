@@ -9,6 +9,8 @@ import networkx as nx
 from bs4 import BeautifulSoup
 import os
 import validators
+import re
+from datetime import datetime
 from collections import namedtuple
 
 
@@ -142,9 +144,10 @@ class Crawler:
         texts = []
 
         for article in soup.find_all("article"):
-            paragraphs = article.find_all("p")
+            temp = [remove_datestamp(i.get_text()) for i in article.find_all("p")]
+            paragraphs = [i for i in temp if i != ""]
 
-            text = " ".join(remove_nonbreaking(p.get_text()) for p in paragraphs)
+            text = " ".join(remove_nonbreaking(p) for p in paragraphs)
 
             # ignore empty paragraphs
             if text:
@@ -265,6 +268,10 @@ def _clean_links(_visited: set[Link], links: set[str]) -> list[str]:
 def remove_nonbreaking(text: str) -> str:
     return re.sub("(\xa0)+", " ", text)
 
+def remove_datestamp(s):
+    pattern = r"^(\d{1,2}[-](gen|feb|mar|apr|mag|giu|lul|ago|set|ott|nov|dec)[-]\d{4})\s*"
+    return re.sub(pattern, "", s)
+
 if __name__ == "__main__":
     from datetime import datetime
 
@@ -272,7 +279,7 @@ if __name__ == "__main__":
         root="https://www.unipa.it/",
         strategy="bfs",
         max_depth=5,
-        max_visits=500,
+        max_visits=200,
     )
 
     try:
