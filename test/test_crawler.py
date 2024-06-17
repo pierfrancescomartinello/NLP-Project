@@ -90,3 +90,8 @@ def test_bfs_step():
     lvl2_2 = ["2a", "2b", "2c"]
     lvl2_3 = ["3a", "3b", "2c"]
     raise NotImplementedError
+
+
+def test_remove_nonbreaking():
+    assert "\xa0" not in remove_nonbreaking("ciao\xa0")
+    assert "\xa0" not in remove_nonbreaking("ciao\xa0\xa0")
