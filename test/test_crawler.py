@@ -1,7 +1,8 @@
 from bs4 import BeautifulSoup
-from src.crawler import Crawler, Link
+from src.crawler import Crawler, Link, remove_datestamp, remove_nonbreaking
 import os
 import glob
+import pytest
 
 def test_set_strategy():
     strategy = "bfs"
@@ -95,3 +96,11 @@ def test_bfs_step():
 def test_remove_nonbreaking():
     assert "\xa0" not in remove_nonbreaking("ciao\xa0")
     assert "\xa0" not in remove_nonbreaking("ciao\xa0\xa0")
+
+
+
+def test_remove_datestamp():
+    assert remove_datestamp('17-giu-2024 Some text') == "Some text"             # Output: "Some text"
+    assert remove_datestamp('17-giu-2024Some text') == "Some text"              # Output: "Some text"
+    assert remove_datestamp('Some text 17-giu-2024') == "Some text 17-giu-2024" # Output: "Some text 17-giu-2024"
+    assert remove_datestamp('17-giu-2024') == ""                                # Output: ""
