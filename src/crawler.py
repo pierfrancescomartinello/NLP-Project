@@ -291,5 +291,6 @@ if __name__ == "__main__":
         pass
 
     timestamp = datetime.now().strftime("%y%m%d%H%M%S")
-    c.output_articles(f"./output/output{timestamp}.json")
-    c.plot_topology(output_dir=f"./output/output{timestamp}.png")
+    c.output_articles(f"./output/{timestamp}/output.json")
+    c.plot_topology(output_dir=f"./output/{timestamp}/topology_picture.png")
+    pickle.dump(c.topology, open(f"./output/{timestamp}topology_graph.pickle", "wb"))
