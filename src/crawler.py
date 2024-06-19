@@ -2,6 +2,7 @@ import math
 from pathlib import Path
 import requests
 from typing import Callable
+import pickle
 import json
 
 import matplotlib.pyplot as plt
@@ -278,8 +279,8 @@ if __name__ == "__main__":
     c = Crawler(
         root="https://www.unipa.it/",
         strategy="bfs",
-        max_depth=5,
-        max_visits=200,
+        max_depth=30,
+        max_visits=math.inf,
     )
 
     try:
@@ -290,7 +291,6 @@ if __name__ == "__main__":
         # Keyboard interrupt does not end the execution but, returns whatever it has found
         pass
 
-    timestamp = datetime.now().strftime("%y%m%d%H%M%S")
     c.output_articles(f"./output/unipa_dataset.json")
-    c.plot_topology(output_dir=f"./output//topology_picture.png")
+    c.plot_topology(output_dir=f"./output/topology.png")
     pickle.dump(c.topology, open(f"./output/topology_graph.pickle", "wb"))
